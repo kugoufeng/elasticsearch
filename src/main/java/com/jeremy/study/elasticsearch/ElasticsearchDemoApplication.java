@@ -1,4 +1,4 @@
-package com.jeremy.study.elasticsearchdemo;
+package com.jeremy.study.elasticsearch;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
