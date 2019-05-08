@@ -3,13 +3,21 @@ package com.jeremy.study.elasticsearch.crawler;
 import cn.edu.hfut.dmic.webcollector.model.CrawlDatums;
 import cn.edu.hfut.dmic.webcollector.model.Page;
 import cn.edu.hfut.dmic.webcollector.plugin.rocks.BreadthCrawler;
-import com.jeremy.study.elasticsearch.domain.Book;
+import com.alibaba.fastjson.JSON;
+import com.jeremy.study.elasticsearch.document.Book;
+import com.jeremy.study.elasticsearch.service.ElasticsearchCRUD;
 import org.jsoup.nodes.Element;
+
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 public class MiguReadCrawler extends BreadthCrawler {
 
-    public MiguReadCrawler(String crawlPath, boolean autoParse) {
+    ElasticsearchCRUD elasticsearchCRUD;
+
+    public MiguReadCrawler(String crawlPath, boolean autoParse, ElasticsearchCRUD elasticsearchCRUD) {
         super(crawlPath, autoParse);
+        this.elasticsearchCRUD = elasticsearchCRUD;
         /**设置爬取的网站地址
          * addSeed 表示添加种子
          * 种子链接会在爬虫启动之前加入到抓取信息中并标记为未抓取状态.这个过程称为注入*/
@@ -54,24 +62,14 @@ public class MiguReadCrawler extends BreadthCrawler {
                 Element shortDesc = page.select(".shortDesc").first();
                 book.setShortDesc(shortDesc.text());
                 Element readUrl = page.select(".free").first();
-                book.setReadUrl("http://wap.cmread.com/r".concat(readUrl.attr("href")));
-                System.out.println(book);
+                book.setReadUrl("http://wap.cmread.com".concat(readUrl.attr("href")));
+                Pattern pattern = Pattern.compile("[1-9][0-9]{8}");
+                Matcher matcher = pattern.matcher(url);
+                String bid = matcher.find() ? matcher.group(0) : null;
+                if (null != bid) {
+                    elasticsearchCRUD.create("book", "textBook", bid, JSON.toJSONString(book));
+                }
             }
         }
     }
-
-    public static void main(String[] args) throws Exception {
-        /**
-         * DemoAutoNewsCrawler 构造器中会进行 数据初始化，这两个参数接着会传给父类
-         * super(crawlPath, autoParse);
-         * crawlPath：表示设置保存爬取记录的文件夹，本例运行之后会在应用根目录下生成一个 "crawl" 目录存放爬取信息
-         * */
-        MiguReadCrawler crawler = new MiguReadCrawler("crawl", true);
-        /**
-         * 启动爬虫，爬取的深度为4层
-         * 添加的第一层种子链接,为第1层
-         */
-        crawler.start(4);
-    }
-
 }

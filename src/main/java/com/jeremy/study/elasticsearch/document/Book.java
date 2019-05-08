@@ -1,8 +1,12 @@
-package com.jeremy.study.elasticsearch.domain;
+package com.jeremy.study.elasticsearch.document;
 
-import java.io.Serializable;
+import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.serializer.SerializerFeature;
 
-public class Book implements Serializable {
+import java.util.HashMap;
+import java.util.Map;
+
+public class Book implements BaseDoc {
     private static final long serialVersionUID = -759629151992954827L;
 
     private String bookName;
@@ -64,5 +68,20 @@ public class Book implements Serializable {
                 ", shortDesc='" + shortDesc + '\'' +
                 ", readUrl='" + readUrl + '\'' +
                 '}';
+    }
+
+    @Override
+    public String getElsMapping() {
+        Map<String, String> baseMap = new HashMap<>();
+        baseMap.put("type", "text");
+        baseMap.put("analyzer", "ik_max_word");
+        baseMap.put("search_analyzer", "ik_max_word");
+        Map<String, Map<String, String>> filedMap = new HashMap<>();
+        filedMap.put("bookName", baseMap);
+        filedMap.put("bookAuthor", baseMap);
+        filedMap.put("shortDesc", baseMap);
+        Map<String, Map<String, Map<String, String>>> mapping = new HashMap<>();
+        mapping.put("properties", filedMap);
+        return JSON.toJSONString(mapping, SerializerFeature.DisableCircularReferenceDetect);
     }
 }
