@@ -62,7 +62,17 @@ public class ElasticsearchCRUDImpl implements ElasticsearchCRUD {
     }
 
     @Override
-    public SearchResponse search(String[] indices, String[] types, String jsonData) {
-        return client.prepareSearch(indices).setTypes(types).setSearchType(SearchType.DFS_QUERY_THEN_FETCH).setQuery(QueryBuilders.wrapperQuery(jsonData)).get();
+    public SearchResponse search(String[] indices, String[] types, String dslBody) {
+        return search(indices, types, 0, 10, dslBody);
+    }
+
+    @Override
+    public SearchResponse search(String[] indices, String[] types, int from, int size, String dslBody) {
+        return client.prepareSearch(indices).setTypes(types)
+                .setSearchType(SearchType.DFS_QUERY_THEN_FETCH)
+                .setQuery(QueryBuilders.wrapperQuery(dslBody))
+                .setFrom(from)
+                .setSize(size)
+                .get();
     }
 }

@@ -44,5 +44,10 @@ public interface ElasticsearchCRUD {
     /**
      * 搜索数据
      */
-    SearchResponse search(String[] indices, String[] types, String jsonData);
+    SearchResponse search(String[] indices, String[] types, String dslBody);
+
+    /**
+     * 搜索数据
+     */
+    SearchResponse search(String[] indices, String[] types, int from,int size,String dslBody);
 }
